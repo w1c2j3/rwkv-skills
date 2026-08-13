@@ -20,6 +20,7 @@ from src.eval.context_budget import compose_context_question
 from src.eval.long_doc_evidence import LongDocEvidenceConfig
 from src.infer.backend import InferenceBackend, resolve_generation_prompt_batch_size
 from src.infer.sampling import GenerationOutput, SamplingConfig
+from src.eval.naive_prompt_protocol import NAIVE_NOCOT_ASSISTANT_PREFIX
 
 USER_SENTINEL = "\nUser:"
 LEGACY_GENERATION_STOP_SUFFIXES = (USER_SENTINEL,)
@@ -49,9 +50,9 @@ DEFAULT_COT_PROMPT = """User: <Q>
 
 Assistant: <think"""
 
-DEFAULT_DIRECT_PROMPT = """User: <Q>
+DEFAULT_DIRECT_PROMPT = f"""User: <Q>
 
-Assistant:"""
+Assistant: {NAIVE_NOCOT_ASSISTANT_PREFIX}"""
 
 DEFAULT_FINAL_PROMPT = """<Q><COT>
 Therefore, the answer is \\(\\boxed{"""

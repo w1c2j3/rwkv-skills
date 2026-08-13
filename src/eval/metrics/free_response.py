@@ -28,6 +28,10 @@ from src.eval.datasets.data_loader.free_answer import JsonlFreeAnswerLoader
 from src.eval.datasets.data_struct.free_answer import FreeAnswerRecord
 from src.eval.k_values import NumericK, filter_metrics_by_k
 from src.eval.metrics.at_k import compute_avg_at_k, compute_pass_at_k
+from src.eval.naive_prompt_protocol import (
+    is_naive_nocot_prompt,
+    strip_generated_empty_think_closer,
+)
 from src.eval.results.io import iter_jsonl
 from src.eval.results.schema import make_eval_payload, strict_nonneg_int
 
@@ -5509,7 +5513,10 @@ def _clip_generation_sentinels(text: str, *, prompt: str = "") -> str:
 
 def _stage_text(payload: dict[str, Any], stage: int) -> str:
     text = str(payload.get(f"completion{stage}") or "")
-    return _clip_generation_sentinels(text, prompt=_stage_prompt(payload, stage))
+    prompt = _stage_prompt(payload, stage)
+    if is_naive_nocot_prompt(prompt):
+        text = strip_generated_empty_think_closer(text)
+    return _clip_generation_sentinels(text, prompt=prompt)
 
 
 def _stage_prompt(payload: dict[str, Any], stage: int) -> str:
@@ -5571,7 +5578,10 @@ def _has_strategy_a(payload: dict[str, Any]) -> bool:
 def _strategy_a_text(payload: dict[str, Any]) -> str:
     if _has_strategy_a(payload):
         text = str(payload.get("strategy_a_completion") or "")
-        return _clip_generation_sentinels(text, prompt=_strategy_a_prompt(payload))
+        prompt = _strategy_a_prompt(payload)
+        if is_naive_nocot_prompt(prompt):
+            text = strip_generated_empty_think_closer(text)
+        return _clip_generation_sentinels(text, prompt=prompt)
     return _completion_text(payload)
 
 

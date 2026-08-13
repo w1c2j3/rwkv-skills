@@ -4,6 +4,12 @@ English | [中文](README.zh-CN.md)
 
 An evaluation scaffold for RWKV7 that targets an external vLLM-RWKV OpenAI-compatible inference service, with dataset preppers for common benchmarks and a GPU scheduler skeleton.
 
+The formal benchmark registry is the Strict46 score matrix: 21 knowledge, 16
+maths, 7 coding, and 2 instruction-following benchmarks. Function-calling
+integrations are kept in a separate auxiliary catalogue: they remain available
+for explicit resolution and scheduler workflows, but are not included in the
+default formal benchmark set.
+
 ## Project structure
 Third-party benchmark data and evaluation artifacts stay out of the source package. The public scoreboard is maintained separately in the Helicopter repository.
 

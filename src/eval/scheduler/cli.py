@@ -13,7 +13,7 @@ from src.eval.env_config import load_env_file
 
 load_env_file(Path(".env"))
 
-from src.eval.benchmark_registry import ALL_BENCHMARKS, BENCHMARK_ALIASES, BenchmarkField
+from src.eval.benchmark_registry import BENCHMARK_ALIASES, KNOWN_BENCHMARKS, BenchmarkField
 from src.eval.evaluating import RunMode, collect_benchmark_dataset_slugs
 from src.eval.tasks.function_calling.rwkv_prompt import (
     FUNCTION_PROMPT_STYLE_CHOICES,
@@ -71,7 +71,7 @@ _KNOWN_DATASET_SLUGS: tuple[str, ...] = tuple(
     sorted({canonical_slug(slug) for spec in JOB_CATALOGUE.values() for slug in spec.dataset_slugs})
 )
 _KNOWN_BENCHMARK_NAMES: tuple[str, ...] = tuple(
-    sorted({item.name for item in ALL_BENCHMARKS} | set(BENCHMARK_ALIASES))
+    sorted({item.name for item in KNOWN_BENCHMARKS} | set(BENCHMARK_ALIASES))
 )
 _BENCHMARK_FIELD_CHOICES: tuple[str, ...] = tuple(field.value for field in BenchmarkField)
 _RUN_MODE_CHOICES: tuple[str, ...] = tuple(mode.value for mode in RunMode)

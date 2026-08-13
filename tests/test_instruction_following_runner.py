@@ -124,6 +124,32 @@ def test_ifeval_strips_complete_think_block_before_scoring(tmp_path) -> None:
     assert metrics.payloads[0]["answer"] == "alpha"
 
 
+def test_ifeval_strips_generated_empty_think_closer_before_scoring(tmp_path) -> None:
+    dataset = tmp_path / "ifeval" / "test.jsonl"
+    dataset.parent.mkdir()
+    dataset.write_text(
+        '{"key": 0, "prompt": "Mention alpha.", '
+        '"instruction_id_list": ["keywords:existence"], '
+        '"kwargs": [{"keywords": ["alpha"]}]}\n'
+    )
+
+    metrics = evaluate_instruction_following(
+        [
+            {
+                "sample_index": 0,
+                "repeat_index": 0,
+                "prompt1": "User: Mention alpha.\n\nAssistant: <think></think",
+                "completion1": ">\nalpha",
+            }
+        ],
+        dataset_path=dataset,
+        dataset_slug="ifeval_test",
+    )
+
+    assert metrics.prompt_accuracy == 1.0
+    assert metrics.payloads[0]["answer"] == "alpha"
+
+
 def test_ifeval_unclosed_leading_think_is_not_scored_as_answer(tmp_path) -> None:
     dataset = tmp_path / "ifeval" / "test.jsonl"
     dataset.parent.mkdir()

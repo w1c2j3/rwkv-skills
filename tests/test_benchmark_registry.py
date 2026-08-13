@@ -5,9 +5,12 @@ import pytest
 from src.eval.benchmark_registry import (
     ALL_BENCHMARKS,
     AUTO_TARGET_ATTEMPTS,
+    AUXILIARY_BENCHMARKS,
     BENCHMARKS_BY_FIELD,
     BenchmarkField,
     CoTMode,
+    KNOWN_BENCHMARKS,
+    KNOWN_BENCHMARKS_BY_FIELD,
     expand_benchmark_alias,
     get_benchmarks_with_field,
     resolve_benchmark_metadata,
@@ -262,9 +265,17 @@ def test_benchmarks_are_grouped_by_field_like_rwkv_rs() -> None:
     assert all(item.field is BenchmarkField.KNOWLEDGE for item in knowledge)
 
 
-def test_non_fc_catalog_is_exactly_the_strict46_set() -> None:
+def test_formal_catalog_is_exactly_the_strict46_set() -> None:
+    assert len(ALL_BENCHMARKS) == 46
     assert len(BENCHMARKS_BY_FIELD[BenchmarkField.KNOWLEDGE]) == 21
     assert len(BENCHMARKS_BY_FIELD[BenchmarkField.MATHS]) == 16
     assert len(BENCHMARKS_BY_FIELD[BenchmarkField.CODING]) == 7
     assert len(BENCHMARKS_BY_FIELD[BenchmarkField.INSTRUCTION_FOLLOWING]) == 2
-    assert len(BENCHMARKS_BY_FIELD[BenchmarkField.FUNCTION_CALLING]) == 62
+    assert BENCHMARKS_BY_FIELD[BenchmarkField.FUNCTION_CALLING] == ()
+    assert all(item.field is not BenchmarkField.FUNCTION_CALLING for item in ALL_BENCHMARKS)
+
+
+def test_function_calling_catalog_is_auxiliary_but_still_known() -> None:
+    assert len(AUXILIARY_BENCHMARKS) == 62
+    assert len(KNOWN_BENCHMARKS) == 108
+    assert KNOWN_BENCHMARKS_BY_FIELD[BenchmarkField.FUNCTION_CALLING] == AUXILIARY_BENCHMARKS

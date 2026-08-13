@@ -141,6 +141,37 @@ def test_dataset_snapshot_binds_bytes_records_order_code_and_revision(
     assert reordered["canonical_records_sha256"] != canonical_digest
 
 
+def test_dataset_snapshot_canonicalizes_nonfinite_floats_deterministically(
+    tmp_path: Path,
+) -> None:
+    dataset = tmp_path / "nonfinite_test.jsonl"
+    dataset.write_text(
+        '{"id":1,"value":NaN}\n'
+        '{"id":2,"value":Infinity}\n'
+        '{"id":3,"value":-Infinity}\n'
+    )
+
+    first = build_dataset_snapshot(
+        dataset,
+        dataset_slug="nonfinite_test",
+        loader=_SnapshotLoader,
+        resolver=_snapshot_resolver,
+        repo_root=tmp_path,
+    )
+    repeated = build_dataset_snapshot(
+        dataset,
+        dataset_slug="nonfinite_test",
+        loader=_SnapshotLoader,
+        resolver=_snapshot_resolver,
+        repo_root=tmp_path,
+    )
+
+    assert first == repeated
+    assert first["row_count"] == 3
+    assert canonical_json_sha256(float("nan")) != canonical_json_sha256(float("inf"))
+    assert canonical_json_sha256(float("inf")) != canonical_json_sha256(float("-inf"))
+
+
 def test_dataset_snapshot_rejects_caller_records_from_different_bytes(
     tmp_path: Path,
 ) -> None:

@@ -13,6 +13,7 @@ from src.eval.k_values import NumericK
 from src.eval.metrics.at_k import compute_avg_at_k
 from src.eval.results.io import iter_jsonl
 from src.eval.results.schema import make_eval_payload, strict_nonneg_int
+from src.eval.naive_prompt_protocol import strip_generated_empty_think_closer
 
 from . import instructions_registry
 
@@ -53,7 +54,7 @@ def _response_from_completion(payload: dict) -> str:
 
 
 def _strip_reasoning_block(text: str) -> str:
-    body = str(text or "")
+    body = strip_generated_empty_think_closer(text)
     body = _THINK_BLOCK_RE.sub("", body).strip()
     if _LEADING_THINK_RE.match(body):
         return ""

@@ -1,13 +1,13 @@
-from __future__ import annotations
-
 """Job catalogue & dataset bookkeeping for the scheduler."""
+
+from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Sequence
 
-from src.eval.benchmark_registry import ALL_BENCHMARKS, BENCHMARKS_BY_FIELD, BenchmarkField
+from src.eval.benchmark_registry import KNOWN_BENCHMARKS, KNOWN_BENCHMARKS_BY_FIELD, BenchmarkField
 from src.eval.runner_registry import ALL_RUNNERS, RunnerGroup, RunnerSpec as RegisteredRunnerSpec
 
 from .dataset_utils import (
@@ -53,7 +53,7 @@ def _field_dataset_slugs(field: BenchmarkField) -> tuple[str, ...]:
     return tuple(
         sorted(
             canonical_slug(make_dataset_slug(metadata.dataset, metadata.default_split))
-            for metadata in BENCHMARKS_BY_FIELD.get(field, ())
+            for metadata in KNOWN_BENCHMARKS_BY_FIELD.get(field, ())
         )
     )
 
@@ -68,7 +68,7 @@ def _build_dataset_catalogues() -> tuple[
 ]:
     specs: dict[str, DatasetPrepSpec] = {}
     job_dataset_slugs: dict[str, list[str]] = {}
-    for metadata in ALL_BENCHMARKS:
+    for metadata in KNOWN_BENCHMARKS:
         slug = canonical_slug(make_dataset_slug(metadata.dataset, metadata.default_split))
         specs.setdefault(slug, DatasetPrepSpec(metadata.dataset, metadata.default_split))
         for job_name in metadata.scheduler_jobs:

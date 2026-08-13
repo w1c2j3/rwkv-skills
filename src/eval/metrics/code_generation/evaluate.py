@@ -27,6 +27,7 @@ from src.eval.results.io import iter_jsonl
 from src.eval.results.schema import build_context_from_completions, strict_nonneg_int
 from src.eval.metrics.code_generation.human_eval import evaluate_functional_correctness
 from src.eval.metrics.code_generation.mbpp import evaluate_mbpp
+from src.eval.naive_prompt_protocol import strip_generated_empty_think_closer
 
 _THINK_BLOCK_RE = re.compile(r"<think\b[^>]*>.*?</think>", re.IGNORECASE | re.DOTALL)
 _FENCED_CODE_RE = re.compile(
@@ -57,7 +58,7 @@ def extract_code_completion(text: str) -> str:
 
     if not text:
         return ""
-    body = str(text)
+    body = strip_generated_empty_think_closer(text)
     body = _THINK_BLOCK_RE.sub("", body)
     body = _LEADING_END_THINK_RE.sub("", body, count=1)
     matches = list(_FENCED_CODE_RE.finditer(body))

@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Benchmark selection helpers aligned with rwkv-rs' evaluating layer."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Sequence
@@ -10,13 +10,15 @@ from src.eval.benchmark_registry import (
     BENCHMARKS_BY_FIELD,
     BenchmarkField,
     BenchmarkMetadata,
+    KNOWN_BENCHMARKS,
+    KNOWN_BENCHMARKS_BY_FIELD,
     expand_benchmark_alias,
     resolve_benchmark_metadata,
 )
 from src.eval.scheduler.dataset_utils import make_dataset_slug
 
 
-_BENCHMARKS_BY_NAME: dict[str, BenchmarkMetadata] = {item.name: item for item in ALL_BENCHMARKS}
+_BENCHMARKS_BY_NAME: dict[str, BenchmarkMetadata] = {item.name: item for item in KNOWN_BENCHMARKS}
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,7 +55,14 @@ def collect_benchmarks(
     selected: dict[str, SelectedBenchmark] = {}
 
     for field in fields or ():
-        for metadata in BENCHMARKS_BY_FIELD.get(field, ()):
+        # Explicit field selection keeps auxiliary function-calling workflows
+        # available.  The no-filter default below remains the formal Strict46.
+        field_catalogue = (
+            KNOWN_BENCHMARKS_BY_FIELD
+            if field is BenchmarkField.FUNCTION_CALLING
+            else BENCHMARKS_BY_FIELD
+        )
+        for metadata in field_catalogue.get(field, ()):
             selected.setdefault(
                 metadata.name,
                 SelectedBenchmark(metadata=metadata, dataset_slug=benchmark_dataset_slug(metadata)),

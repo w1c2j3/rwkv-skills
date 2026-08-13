@@ -306,6 +306,36 @@ def test_multiple_choice_replay_accepts_leading_label_with_explanation(tmp_path)
     assert metrics.payloads[0]["answer"] == "B"
 
 
+def test_multiple_choice_replay_strips_generated_empty_think_closer(tmp_path) -> None:
+    dataset_path = tmp_path / "mmlu_test.jsonl"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "question": "Pick four.",
+                "A": "0",
+                "B": "4",
+                "C": "2",
+                "D": "6",
+                "answer": "B",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    payload = {
+        "sample_index": 0,
+        "repeat_index": 0,
+        "pass_index": 0,
+        "completion1": ">\nB",
+        "direct_raw_completion": ">\nB",
+    }
+
+    metrics = evaluate_multiple_choice([payload], dataset_path=dataset_path)
+
+    assert metrics.accuracy == 1.0
+    assert metrics.payloads[0]["answer"] == "B"
+
+
 def test_multiple_choice_cot_generates_final_answer_by_default(tmp_path) -> None:
     dataset_path = tmp_path / "mmlu_pro_demo_test.jsonl"
     dataset_path.write_text(
@@ -505,6 +535,45 @@ def test_multiple_choice_cascade_routes_only_strategy_a_failure_to_b(tmp_path) -
         "strategy_b_final_raw_stop_reason": "stop_token",
         "strategy_b_final_extracted_letter": "B",
     }
+
+
+def test_cascade_wrong_strategy_b_does_not_inherit_missing_prediction_credit(
+    tmp_path,
+) -> None:
+    dataset_path = tmp_path / "gpqa_diamond_test.jsonl"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "question": "2+2=?",
+                "A": "3",
+                "B": "4",
+                "C": "5",
+                "D": "6",
+                "answer": "B",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    payload = {
+        "sample_index": 0,
+        "repeat_index": 0,
+        "pass_index": 0,
+        "strategy_a_completion": ">reasoning without a final answer",
+        "completion1": ">second attempt reasoning",
+        "completion2": " A",
+    }
+
+    metrics = evaluate_multiple_choice_cascade(
+        [payload],
+        dataset_path=dataset_path,
+        missing_prediction_score=0.25,
+    )
+
+    assert metrics.metrics_by_group["strategy_a"]["score"] == 0.25
+    assert metrics.metrics_by_group["strategy_b"]["valid"] == 1.0
+    assert metrics.metrics_by_group["strategy_b"]["exact_accuracy"] == 0.0
+    assert metrics.metrics_by_group["strategy_b"]["score"] == 0.0
 
 
 def test_generated_choice_accepts_exact_option_text() -> None:

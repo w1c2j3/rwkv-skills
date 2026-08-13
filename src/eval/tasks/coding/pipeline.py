@@ -20,6 +20,10 @@ from src.eval.prompt_builders import (
     prompt_for_marker,
 )
 from src.eval.results.schema import dataset_slug_parts, normalize_sampling_config_by_stage, prompt_delta
+from src.eval.naive_prompt_protocol import (
+    NAIVE_COT_ASSISTANT_PREFIX,
+    NAIVE_NOCOT_ASSISTANT_PREFIX,
+)
 from src.eval.scheduler.dataset_utils import infer_dataset_slug_from_path
 from src.infer.backend import InferenceBackend, resolve_generation_prompt_batch_size
 from src.infer.sampling import GenerationOutput, SamplingConfig
@@ -104,7 +108,7 @@ def _format_lcb_naive_cot_prompt(question: str, starter_code: str | None) -> str
     clean = (question or "").strip()
     if starter_code and starter_code.strip():
         clean = f"{clean}\n```python\n{starter_code.strip()}\n```"
-    return f"User: {clean}\n\nAssistant: <think"
+    return f"User: {clean}\n\nAssistant: {NAIVE_COT_ASSISTANT_PREFIX}"
 
 
 def _format_lcb_direct_prompt(
@@ -117,7 +121,10 @@ def _format_lcb_direct_prompt(
         clean = (question or "").strip()
         if starter_code and starter_code.strip():
             clean = f"{clean}\n```python\n{starter_code.strip()}\n```"
-        return f"User: {clean}\n\nAssistant: <think></think>\n```python\n"
+        return (
+            f"User: {clean}\n\nAssistant: {NAIVE_NOCOT_ASSISTANT_PREFIX}"
+            "\n```python\n"
+        )
     body = _format_lcb_body(question, starter_code)
     return f"User: {_LCB_SYSTEM_MESSAGE}\n{body}Assistant: <think></think>\n```python\n"
 

@@ -11,6 +11,7 @@ from typing import Iterable, Sequence
 from src.eval.datasets.data_loader.multiple_choice import JsonlMultipleChoiceLoader
 from src.eval.results.io import iter_jsonl
 from src.eval.results.schema import make_eval_payload, strict_nonneg_int
+from src.eval.naive_prompt_protocol import strip_generated_empty_think_closer
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 _LETTER_RE = re.compile(r"[A-Z]")
@@ -68,6 +69,7 @@ def _extract_direct_choice(
     raw text; otherwise fixing the adapter cannot repair those rows.
     """
 
+    text = strip_generated_empty_think_closer(text)
     valid_letters = ALPHABET[:num_choices]
     leading = re.match(
         rf"^\s*[\[(ï¼ˆ]?([{re.escape(valid_letters)}])"
@@ -294,7 +296,18 @@ def evaluate_multiple_choice_cascade(
             strategy_b_passed = bool(answer_letter) and strategy_b_generated == answer_letter
             if strategy_b_passed:
                 rescued += 1
-        strategy_b_score = 1.0 if strategy_b_passed else strategy_a_score
+        # Chance credit for an unparseable strategy-A completion must not
+        # survive once strategy B produced a legal answer.  At that point the
+        # final prediction is observed, so a wrong choice scores zero.  Keep
+        # the missing-prediction fallback only when neither strategy yielded
+        # any usable answer.
+        strategy_b_score = (
+            1.0
+            if strategy_b_passed
+            else 0.0
+            if strategy_b_prediction
+            else strategy_a_score
+        )
 
         group_values = {
             "strategy_a": (strategy_a_prediction, strategy_a_passed, strategy_a_score),

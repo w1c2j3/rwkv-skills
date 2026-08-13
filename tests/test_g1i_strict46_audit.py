@@ -587,9 +587,9 @@ def test_simpleqa_alias_protocol_lookups_use_physical_source_split() -> None:
     assert AUDIT["_expected_avg_k"](row) == 8.0
     assert AUDIT["_expected_effective_sample_count"](row) == 8000
     stages = AUDIT["_expected_sampling_stages"](row)
-    assert stages["stage1"]["max_new_tokens"] == 8192
+    assert stages["stage1"]["max_new_tokens"] == 12288
     assert stages["stage2"]["max_new_tokens"] == 128
-    assert stages["strategy_a"]["max_new_tokens"] == 8192
+    assert stages["strategy_a"]["max_new_tokens"] == 12288
 
 
 def test_protocol_lookups_fall_back_to_logical_fields_without_provenance() -> None:

@@ -36,14 +36,18 @@ _REVISION_KEYS = (
     "sha",
     "version",
 )
+_NONFINITE_FLOAT_TAG = "__rwkv_provenance_nonfinite_float__"
 
 
 def _canonical_value(value: Any) -> Any:
     if value is None or isinstance(value, (str, bool, int)):
         return value
     if isinstance(value, float):
-        if not math.isfinite(value):
-            raise ValueError("non-finite floats are not valid provenance values")
+        if math.isnan(value):
+            return {_NONFINITE_FLOAT_TAG: "nan"}
+        if math.isinf(value):
+            label = "positive_infinity" if value > 0 else "negative_infinity"
+            return {_NONFINITE_FLOAT_TAG: label}
         return value
     if isinstance(value, Path):
         return str(value)

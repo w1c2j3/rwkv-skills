@@ -9,6 +9,11 @@ def test_extract_code_completion_keeps_bare_code() -> None:
     assert extract_code_completion(completion) == "def add(a, b):\n    return a + b"
 
 
+def test_extract_code_completion_removes_generated_empty_think_closer() -> None:
+    completion = ">\n```python\ndef add(a, b):\n    return a + b\n```"
+    assert extract_code_completion(completion) == "def add(a, b):\n    return a + b"
+
+
 def test_extract_code_completion_removes_think_block_and_python_fence() -> None:
     completion = (
         "<think>Need a direct implementation.</think>\n"

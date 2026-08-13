@@ -54,7 +54,7 @@ _CONFIG_CACHE: dict[Path, tuple[str, dict[str, Any]]] = {}
 _FAMILY_LONG_GENERATION_BUDGETS = {
     "-g1g-": 6144,
     "-g1h-": 8192,
-    "-g1i-": 8192,
+    "-g1i-": 12288,
 }
 
 
@@ -225,9 +225,9 @@ def _apply_family_generation_override(
 ) -> dict[str, Any]:
     """Normalize long-generation budgets for the G1g/G1h/G1i score lanes.
 
-    G1g uses a 6K long-output budget, including benchmarks whose explicit
-    code template still says 8K. G1h and G1i expand legacy 4K templates to
-    8K. Short answer budgets remain untouched for all families.
+    G1g uses a 6K long-output budget, G1h uses 8K for its 10K context, and
+    G1i uses 12K for its formal 16K context. Short answer budgets remain
+    untouched for all families.
     """
 
     merged = dict(table)
@@ -243,7 +243,10 @@ def _apply_family_generation_override(
         if marker == "-g1g-" and current_limit >= 4096:
             merged["max_generate_tokens"] = replacement
             merged.pop("max_new_tokens", None)
-        elif marker in {"-g1h-", "-g1i-"} and current_limit == 4096:
+        elif marker == "-g1h-" and current_limit == 4096:
+            merged["max_generate_tokens"] = replacement
+            merged.pop("max_new_tokens", None)
+        elif marker == "-g1i-" and current_limit >= 4096:
             merged["max_generate_tokens"] = replacement
             merged.pop("max_new_tokens", None)
         break

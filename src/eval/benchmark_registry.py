@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Benchmark metadata aligned with rwkv-rs' evaluator matrix."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from enum import Enum
@@ -501,8 +501,19 @@ _PREFIX_FALLBACKS: tuple[tuple[tuple[str, ...], BenchmarkMetadata], ...] = (
     ),
 )
 
-ALL_BENCHMARKS: tuple[BenchmarkMetadata, ...] = tuple(
+KNOWN_BENCHMARKS: tuple[BenchmarkMetadata, ...] = tuple(
     sorted(_EXPLICIT_METADATA.values(), key=lambda item: (item.field.value, item.name))
+)
+
+# The formal score matrix is the Strict46 suite.  Function-calling integrations
+# remain explicitly resolvable and schedulable through the auxiliary catalogue,
+# but they are not part of the default/formal benchmark registry.
+ALL_BENCHMARKS: tuple[BenchmarkMetadata, ...] = tuple(
+    item for item in KNOWN_BENCHMARKS if item.field is not BenchmarkField.FUNCTION_CALLING
+)
+
+AUXILIARY_BENCHMARKS: tuple[BenchmarkMetadata, ...] = tuple(
+    item for item in KNOWN_BENCHMARKS if item.field is BenchmarkField.FUNCTION_CALLING
 )
 
 BENCHMARKS_BY_FIELD: dict[BenchmarkField, tuple[BenchmarkMetadata, ...]] = {
@@ -510,9 +521,14 @@ BENCHMARKS_BY_FIELD: dict[BenchmarkField, tuple[BenchmarkMetadata, ...]] = {
     for field in BenchmarkField
 }
 
+KNOWN_BENCHMARKS_BY_FIELD: dict[BenchmarkField, tuple[BenchmarkMetadata, ...]] = {
+    field: tuple(item for item in KNOWN_BENCHMARKS if item.field is field)
+    for field in BenchmarkField
+}
+
 _EXPLICIT_BY_DATASET_SLUG: dict[str, BenchmarkMetadata] = {
     canonical_slug(make_dataset_slug(item.dataset, item.default_split)): item
-    for item in ALL_BENCHMARKS
+    for item in KNOWN_BENCHMARKS
 }
 
 
@@ -593,6 +609,7 @@ def supports_cot_mode(dataset_slug: str, cot_mode: CoTMode) -> bool:
 __all__ = [
     "AUTO_TARGET_ATTEMPTS",
     "ALL_BENCHMARKS",
+    "AUXILIARY_BENCHMARKS",
     "BENCHMARK_ALIASES",
     "BenchmarkField",
     "BenchmarkMetadata",
@@ -601,6 +618,8 @@ __all__ = [
     "default_split_for_benchmark",
     "expand_benchmark_alias",
     "get_benchmarks_with_field",
+    "KNOWN_BENCHMARKS",
+    "KNOWN_BENCHMARKS_BY_FIELD",
     "resolve_benchmark_metadata",
     "scheduler_jobs_for_benchmark",
     "supports_cot_mode",

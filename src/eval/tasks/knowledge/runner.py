@@ -23,6 +23,10 @@ from src.eval.field_common import (
     set_task_env,
 )
 from src.eval.k_values import filter_metrics_by_k
+from src.eval.naive_prompt_protocol import (
+    NAIVE_COT_ASSISTANT_PREFIX,
+    NAIVE_NOCOT_ASSISTANT_PREFIX,
+)
 from src.infer.backend import (
     add_inference_backend_arguments,
     build_inference_backend_from_args,
@@ -106,14 +110,11 @@ def _resolve_knowledge_cot_strategy(root_config: object | None) -> str:
 
 
 def _naive_direct_prompt_template() -> str:
-    # NoCoT must close the model's think block in the prompt.  Merely asking
-    # for an answer does not prevent RWKV reasoning checkpoints from opening
-    # a new <think> block and exhausting the short option-generation window.
-    return "User: <Q>\n<CHOICES>\n\nAssistant: <think></think>\nThe answer is"
+    return f"User: <Q>\n<CHOICES>\n\nAssistant: {NAIVE_NOCOT_ASSISTANT_PREFIX}"
 
 
 def _naive_cot_prompt_template() -> str:
-    return "User: <Q>\n<CHOICES>\n\nAssistant: <think"
+    return f"User: <Q>\n<CHOICES>\n\nAssistant: {NAIVE_COT_ASSISTANT_PREFIX}"
 
 
 def _naive_final_answer_template() -> str:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from src.eval.tasks.maths.pipeline import (
+    DEFAULT_DIRECT_PROMPT,
     FINAL_BOXED_STOP_SUFFIXES,
     FREE_RESPONSE_STOP_TOKENS,
     G1H_GENERATION_STOP_SUFFIXES,
@@ -15,6 +16,18 @@ from src.eval.tasks.maths.pipeline import (
 from src.eval.metrics import free_response as fr
 from src.eval.long_doc_evidence import LongDocEvidenceConfig
 from src.infer.sampling import GenerationOutput, SamplingConfig
+
+
+def test_naive_direct_math_prompt_prefills_empty_think() -> None:
+    assert DEFAULT_DIRECT_PROMPT.endswith("Assistant: <think></think>")
+
+
+def test_math_scoring_strips_generated_empty_think_closer() -> None:
+    payload = {
+        "prompt1": "User: 2+2?\n\nAssistant: <think></think",
+        "completion1": ">\nTherefore, the answer is \\(\\boxed{4}\\).",
+    }
+    assert fr._stage_text(payload, 1).startswith("Therefore")
 
 
 def test_output_stats_does_not_claim_remote_empty_token_ids_are_zero() -> None:

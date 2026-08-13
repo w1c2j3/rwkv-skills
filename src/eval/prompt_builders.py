@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from src.eval.benchmark_registry import CoTMode
+from src.eval.naive_prompt_protocol import NAIVE_NOCOT_ASSISTANT_PREFIX
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 COT_PLACEHOLDER = "<|completions_of_cot|>"
@@ -96,7 +97,7 @@ def build_maths_expected_context(*, subject: str, question: str, cot_mode: CoTMo
 
 def build_instruction_following_prompt(prompt: str, *, enable_think: bool = False) -> str:
     clean_prompt = prompt.lstrip().rstrip(" ")
-    suffix = "<think" if enable_think else "<think></think>\n"
+    suffix = "<think" if enable_think else NAIVE_NOCOT_ASSISTANT_PREFIX
     return f"User: {clean_prompt}\n\nAssistant: {suffix}"
 
 

@@ -55,3 +55,17 @@ def test_collect_benchmark_dataset_slugs_expands_group_aliases() -> None:
     assert canonical_slug("gpqa_main") in slugs
     assert canonical_slug("gpqa_extended") in slugs
     assert canonical_slug("gpqa_diamond") in slugs
+
+
+def test_default_collection_is_the_formal_strict46() -> None:
+    selected = collect_benchmarks()
+
+    assert len(selected) == 46
+    assert all(item.field is not BenchmarkField.FUNCTION_CALLING for item in selected)
+
+
+def test_explicit_function_calling_field_keeps_auxiliary_catalog_available() -> None:
+    selected = collect_benchmarks(fields=(BenchmarkField.FUNCTION_CALLING,))
+
+    assert len(selected) == 62
+    assert all(item.field is BenchmarkField.FUNCTION_CALLING for item in selected)

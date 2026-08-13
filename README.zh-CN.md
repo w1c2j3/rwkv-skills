@@ -1,5 +1,7 @@
 # RWKV Skills
 
+正式 benchmark 注册表采用 Strict46：21 个知识、16 个数学、7 个代码和 2 个指令遵循 benchmark。Function Calling 集成保留在独立的辅助目录中，仍可显式解析和调度，但不再计入默认正式 benchmark 集合。
+
 [English](README.md) | 中文
 
 面向 RWKV7 的评测脚手架，推理侧接入外部 vLLM-RWKV OpenAI 兼容服务，包含常见评测数据集准备器以及一个 GPU 调度器骨架。

@@ -33,7 +33,7 @@ ACCEPTED_EXTRACTOR_LINEAGE_SHA256 = (
 # available for a later release, but any override must still match the runtime
 # module, comparator source and task git hash exactly.
 FINAL_IMPORTED_FREE_RESPONSE_SHA256 = (
-    "649070a785aec5be5ca8a9e8c2b36e17783e18485edbbb6d09c22ca185d5460e"
+    "0eeee0d6a2304f14bb82e47386ceb8b8ac0e3f346042c7e43500d9cfe219c1db"
 )
 FINAL_COMPARATOR_IMPLEMENTATION_SHA256 = (
     "86b49ee7f74a71b1cdf2b8670d74a55a531ec9968062ed5af8706fe91ee9d44b"

@@ -73,7 +73,7 @@ def test_g1g_g1h_and_g1i_expand_legacy_4k_generation_budget() -> None:
     assert g1i is not None
     assert g1g.sampling_overrides["max_generate_tokens"] == 6144
     assert g1h.sampling_overrides["max_generate_tokens"] == 8192
-    assert g1i.sampling_overrides["max_generate_tokens"] == 8192
+    assert g1i.sampling_overrides["max_generate_tokens"] == 12288
 
 
 def test_g1g_and_g1h_mbpp_use_same_frontend_avg8_metric(monkeypatch) -> None:
